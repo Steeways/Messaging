@@ -19,49 +19,91 @@ username_header = f"{len(username):<{HEADER_LENGTH}}".encode("utf-8")
 client_socket.send(username_header + username)
 
 
+if my_username == '' :
+    while True :
+        message = ""
+
+        #Si on a un message à envoyer :
+        if message :
+            message = message.encode("utf-8")
+            message_header = f"{len(message) :< {HEADER_LENGTH}}".encode("utf-8")
+            client_socket.send(message_header + message)
 
 
+    #trying to receive :
+        try :
+            while True :
 
-while True :
-    message = input(f"{my_username} >")
+                username_header = client_socket.recv(HEADER_LENGTH)
 
-    #Si on a un message à envoyer :
-    if message :
-        message = message.encode("utf-8")
-        message_header = f"{len(message) :< {HEADER_LENGTH}}".encode("utf-8")
-        client_socket.send(message_header + message)
+                if not len(username_header) :
+                    print("connection closed by the server")
+                    sys.exit()
 
+                username_length = int(username_header.decode("utf-8").strip())
+                username = client_socket.recv(username_length).decode("utf-8")
 
-#trying to receive :
-    try :
-        while True :
+                message_header = client_socket.recv(HEADER_LENGTH)
+                message_length = int(message_header.decode("utf-8").strip())
+                message = client_socket.recv(message_length).decode("utf-8")
 
-            username_header = client_socket.recv(HEADER_LENGTH)
+                print(f"{username} > {message}")
 
-            if not len(username_header) :
-                print("connection closed by the server")
+        except IOError as e :
+            #erreurs si il n'y a plus de messages à recevoir :
+            if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK :
+                print('Reading error',str(e))
                 sys.exit()
+            continue
 
-            username_length = int(username_header.decode("utf-8").strip())
-            username = client_socket.recv(username_length).decode("utf-8")
-
-            message_header = client_socket.recv(HEADER_LENGTH)
-            message_length = int(message_header.decode("utf-8").strip())
-            message = client_socket.recv(message_length).decode("utf-8")
-
-            print(f"{username} > {message}")
-
-    except IOError as e :
-        #erreurs si il n'y a plus de messages à recevoir :
-        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK :
-            print('Reading error',str(e))
+        except Exception as e:
+            print("general error", str(e))
             sys.exit()
-        continue
+            pass
 
-    except Exception as e:
-        print("general error", str(e))
-        sys.exit()
-        pass
+
+else :
+    while True :
+        message = input(f"{my_username} >")
+
+        #Si on a un message à envoyer :
+        if message :
+            message = message.encode("utf-8")
+            message_header = f"{len(message) :< {HEADER_LENGTH}}".encode("utf-8")
+            client_socket.send(message_header + message)
+
+
+    #trying to receive :
+        try :
+            while True :
+
+                username_header = client_socket.recv(HEADER_LENGTH)
+
+                if not len(username_header) :
+                    print("connection closed by the server")
+                    sys.exit()
+
+                username_length = int(username_header.decode("utf-8").strip())
+                username = client_socket.recv(username_length).decode("utf-8")
+
+                message_header = client_socket.recv(HEADER_LENGTH)
+                message_length = int(message_header.decode("utf-8").strip())
+                message = client_socket.recv(message_length).decode("utf-8")
+
+                print(f"{username} > {message}")
+
+        except IOError as e :
+            #erreurs si il n'y a plus de messages à recevoir :
+            if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK :
+                print('Reading error',str(e))
+                sys.exit()
+            continue
+
+        except Exception as e:
+            print("general error", str(e))
+            sys.exit()
+            pass
+
 
 
 
