@@ -9,8 +9,11 @@ Created on Sat Mar 28 16:27:39 2020
 import socket
 import select
 
+
+HEADER_LENGTH = 10
 IP = socket.gethostbyname(socket.gethostname()) # obtain IP adress
-PORT = 0
+PORT = 1234
+
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #set the server --> smthg like authorize reconnexion
@@ -19,7 +22,6 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 #bind the server
 server.bind((IP, PORT))
 #PORT = server.getsockname()[1]
-
 
 #listen for any request entering
 server.listen()
@@ -36,7 +38,7 @@ def receive_message(client_socket):
         if not len(message_header):
             return False
 
-        message_length = int(message_header.decode("utf-8").trip())
+        message_length = int(message_header.decode("utf-8").strip())
 
         return {"header" : message_header, "data" : client_socket.recv(message_length)}
 
